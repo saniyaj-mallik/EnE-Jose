@@ -29,6 +29,8 @@ class WDM_WooCommerce_CSP_Minimum_Quantity {
 		add_action( 'woocommerce_product_options_inventory_product_data', array( $this, 'add_product_settings' ) );
 		add_action( 'woocommerce_process_product_meta', array( $this, 'save_product_settings' ) );
 
+		// Set default values for new products.
+		add_action( 'woocommerce_new_product', array( $this, 'set_default_min_qty_for_new_product' ), 10, 1 );
 		// Change quantity input arguments.
 		add_filter( 'woocommerce_quantity_input_args', array( $this, 'change_quantity_input_args' ), 10, 2 );
 	}
@@ -80,6 +82,29 @@ class WDM_WooCommerce_CSP_Minimum_Quantity {
 		// Save default minimum quantity.
 		$default_min_quantity = isset( $_POST['_default_min_quantity'] ) ? absint( $_POST['_default_min_quantity'] ) : 1;
 		update_post_meta( $post_id, '_default_min_quantity', max( 1, $default_min_quantity ) );
+	}
+
+
+	/**
+	 * Set default minimum quantity for new products.
+	 *
+	 * @param int $product_id New product ID.
+	 */
+	public function set_default_min_qty_for_new_product( $product_id ) {
+		$product = wc_get_product( $product_id );
+
+		// Only apply to simple products.
+		if ( $product && $product->is_type( 'simple' ) ) {
+			// Set default "Enable CSP" to 'yes' if not set.
+			if ( ! metadata_exists( 'post', $product_id, '_enable_csp_min_quantity' ) ) {
+				update_post_meta( $product_id, '_enable_csp_min_quantity', 'yes' );
+			}
+
+			// Set default minimum quantity to 1 if not set.
+			if ( ! metadata_exists( 'post', $product_id, '_default_min_quantity' ) ) {
+				update_post_meta( $product_id, '_default_min_quantity', 1 );
+			}
+		}
 	}
 
 	/**

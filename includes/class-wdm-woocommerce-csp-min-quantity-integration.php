@@ -15,6 +15,8 @@ class WDM_WooCommerce_CSP_Min_Quantity_Integration {
 	 */
 	public function __construct() {
 		// Add cart validation.
+		// woocommerce_check_cart_items.
+		// woocommerce_cart_updated.
 		add_action( 'woocommerce_cart_updated', array( $this, 'validate_cart_items' ) );
 
 		// Add product validation messages.
